@@ -1,0 +1,19 @@
+{
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "html.format.contentUnformatted": "pre,code,textarea",
+  "html.format.endWithNewline": false,
+  "html.format.extraLiners": "head, body, /html",
+  "html.format.indentHandlebars": false,
+  "html.format.indentInnerHtml": false,
+  "html.format.maxPreserveNewLines": null,
+  "html.format.preserveNewLines": true,
+  "html.format.wrapLineLength": 120,
+  "html.format.wrapAttributes": "auto",
+  // Set the default
+  "editor.formatOnSave": false,
+  // Enable per-language
+  "[php]": {
+    "editor.formatOnSave": true
+  }
+}
