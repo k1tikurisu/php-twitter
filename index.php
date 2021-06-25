@@ -1,7 +1,21 @@
 <?php
+  // set timezone
+  date_default_timezone_set('Asia/Tokyo');
+  
   $title = "Twitter clone with PHP5";
-  $fname = "tweets.txt";
-  file_put_contents($fname, !empty($_POST['tweet']) . "\n", FILE_APPEND);
+  $xmlfile = "tweets.xml";
+  
+  // create data
+  if (isset($_POST['tweet'])) {
+    $now = date("Y-m-d H:i:s");
+    $tweets = simplexml_load_file($xmlfile);
+    $newid = $tweets -> count() + 1;
+    $entry = $tweets -> addChild("entry");
+    $entry -> addAttribute("id", $newid);
+    $entry -> addChild("date", $now);
+    $entry -> addChild("text", $_POST['tweet']);
+    file_put_contents($xmlfile, $tweets -> asXML());
+  }
 
   // set base_url
   if (\filter_input(INPUT_SERVER, "SERVER_NAME") === "webdesign.center.wakayama-u.ac.jp") {
@@ -12,7 +26,7 @@
     $baseUrl = "http://localhost:4000/";
   }
   
-  // prevent double submission
+  // redirect to base_url when the POST methods runs
   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header("Location:" . $baseUrl);
     exit;
@@ -36,11 +50,19 @@
   </form>
   <div>
     <?php
-      if (file_exists($fname)) {
-        $tweets = file_get_contents($fname);
-        $tweets = explode("\n", $tweets);
-        for ($i = 0;$i < count($tweets);$i++) {
-          echo "<div>" . $tweets[$i] . "</div>";
+      if (file_exists($xmlfile)) {
+        $tweets= simplexml_load_file($xmlfile);
+        // sort by id
+        foreach($tweets as $entry) {
+          $entries[(string)$entry['id']] = $entry;
+        }
+        // sort by desc
+        krsort($entries);
+        foreach($entries as $entry) {
+          echo "<div>";
+          echo "<div>" . $entry -> date . "</div>";
+          echo "<div>" . $entry -> text . "</div>";
+          echo "</div>\n";
         }
       }
     ?>
