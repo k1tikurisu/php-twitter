@@ -14,6 +14,14 @@
     $entry -> addAttribute("id", $newid);
     $entry -> addChild("date", $now);
     $entry -> addChild("text", $_POST['tweet']);
+
+    // uploading image files and registering paths
+    if(is_uploaded_file($_FILES['image']['tmp_name'])) {
+      $tmpfile = $_FILES['image']['tmp_name'];
+      $imgfile = "./img/" . $newid . "_" . $_FILES['image']['name'];
+      move_uploaded_file($tmpfile, $imgfile);
+      $entry -> addChild("img", $imgfile);
+    }
     file_put_contents($xmlfile, $tweets -> asXML());
   }
 
@@ -42,10 +50,11 @@
 
 <body>
   <h1><?php echo $title; ?></h1>
-  <form action="index.php" method="POST">
+  <form action="index.php" method="POST" enctype="multipart/form-data">
     <div>
       <textarea name="tweet" placeholder="いまどうしてる？"></textarea>
     </div>
+    <input type="file" name="image" accept="image/gif,image/jpeg,image/jpg,image/png">
     <input type="submit">
   </form>
   <div>
@@ -62,6 +71,9 @@
           echo "<div>";
           echo "<div>" . $entry -> date . "</div>";
           echo "<div>" . $entry -> text . "</div>";
+          if ($entry -> img != "") {
+            echo "<img src='". $entry -> img . "'/>";
+          }
           echo "</div>\n";
         }
       }
