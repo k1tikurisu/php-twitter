@@ -3,10 +3,29 @@
   date_default_timezone_set('Asia/Tokyo');
   
   $title = "Twitter clone with PHP5";
-  $xmlfile = "tweets.xml";
+  $xmlfile = "tweets.xml";  
   
+  // basic auth
+  @session_start();  
+  if(isset($_SESSION['dirname']) && $_SESSION['dirname'] == dirname($_SERVER['SCRIPT_NAME'])) {
+    $login = true;
+  } else {
+    $login = false;
+  }
+  
+  // set base_url
+  if (\filter_input(INPUT_SERVER, "SERVER_NAME") === "webdesign.center.wakayama-u.ac.jp") {
+    // production
+    $baseUrl = "http://webdesign.center.wakayama-u.ac.jp:60080/~s256245/mytweets/";
+  } else {
+    // dev
+    $baseUrl = "http://localhost:4000/";
+    // always logedin in the dev env
+    $login = true;
+  }
+
   // create data
-  if (isset($_POST['tweet'])) {
+  if ($login && isset($_POST['tweet'])) {
     $now = date("Y-m-d H:i:s");
     $tweets = simplexml_load_file($xmlfile);
     $newid = $tweets -> count() + 1;
@@ -23,15 +42,6 @@
       $entry -> addChild("img", $imgfile);
     }
     file_put_contents($xmlfile, $tweets -> asXML());
-  }
-
-  // set base_url
-  if (\filter_input(INPUT_SERVER, "SERVER_NAME") === "webdesign.center.wakayama-u.ac.jp") {
-    // production
-    $baseUrl = "http://webdesign.center.wakayama-u.ac.jp:60080/~s256245/mytweets/";
-  } else {
-    // dev
-    $baseUrl = "http://localhost:4000/";
   }
   
   // redirect to base_url when the POST methods runs
@@ -50,13 +60,22 @@
 
 <body>
   <h1><?php echo $title; ?></h1>
-  <form action="index.php" method="POST" enctype="multipart/form-data">
-    <div>
-      <textarea name="tweet" placeholder="いまどうしてる？"></textarea>
-    </div>
-    <input type="file" name="image" accept="image/gif,image/jpeg,image/jpg,image/png">
-    <input type="submit">
-  </form>
+  <?php 
+    if ($login) {
+      echo <<<HTML
+        <form action="index.php" method="POST" enctype="multipart/form-data">
+          <div>
+            <textarea name="tweet" placeholder="いまどうしてる？"></textarea>
+          </div>
+          <input type="file" name="image" accept="image/gif,image/jpeg,image/jpg,image/png">
+          <input type="submit">
+        </form>
+HTML;
+} else {
+echo "<a href='login.php'>ログイン</a>";
+}
+?>
+
   <div>
     <?php
       if (file_exists($xmlfile)) {
